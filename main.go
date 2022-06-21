@@ -4,7 +4,10 @@ import (
 	"log"
 	"os"
 
+	"gihtub.com/SherzodAbdullajonov/ecommerce-yt/middleware"
 	"github.com/gin-gonic/gin"
+	"gihtub.com/SherzodAbdullajonov/ecommerce-yt/controllers"
+	"gihtub.com/SherzodAbdullajonov/ecommerce-yt/database"
 )
 
 
