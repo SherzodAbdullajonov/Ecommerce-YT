@@ -46,6 +46,7 @@ func Login() gin.HandlerFunc {
 		defer cancel()
 
 		var user models.User
+		var founduser models.User
 		if err := c.BindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
 			return
@@ -68,7 +69,7 @@ func Login() gin.HandlerFunc {
 			fmt.Println(msg)
 			return
 		}
-		token, refresToken, _ := generate.TokenGenerator(*founduser.Email, *founduser.First_name, *founduser.Last_name, founduser.USer_ID)
+		token, refresToken, _ := generate.TokenGenrator(*founduser.Email, *founduser.First_name, *founduser.Last_name, founduser.User_ID)
 		defer cancel()
 
 		generate.UpdateAllTokens(token, refresToken, founduser.User_ID)
@@ -124,7 +125,7 @@ func SignUp() gin.HandlerFunc {
 		user.Updated_At, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		user.ID = primitive.NewObjectID()
 		user.User_ID = user.ID.Hex()
-		token, refreshtoken, _ := generate.TokenGenerator(*user.Email, *user.First_name, *user.Last_name, user.User_ID)
+		token, refreshtoken, _ := generate.TokenGenrator(*user.Email, *user.First_name, *user.Last_name, user.User_ID)
 		user.Token = &token
 		user.Refresh_Token = &refreshtoken
 		user.UserCart = make([]models.ProductUser, 0)
@@ -139,10 +140,26 @@ func SignUp() gin.HandlerFunc {
 	}
 }
 func ProductViewerAdmin() gin.HandlerFunc {
-
+	return func(ctx *gin.Context) {
+		var c, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var products models.Product
+		defer cancel()
+		if err:= ctx.BindJSON(&products); err!= nil{
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
+		products.Product_ID = primitive.NewObjectID()
+		_, anyerr := ProductCollection.InsertOne(c, products)
+		if anyerr != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": anyerr.Error()})
+			return
+		}
+		defer cancel()
+		ctx.JSON(http.StatusOK, "successfully added")
+	}
 }
 
-func SerchProduct() gin.HandlerFunc {
+func SearchProduct() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		var productlist []models.Product
