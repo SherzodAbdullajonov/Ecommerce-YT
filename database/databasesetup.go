@@ -17,9 +17,9 @@ func DBSEt() *mongo.Client {
 	if err!= nil {
 		log.Fatal(err)
 	}
-	ctx, cancle :=context.WithTimeout(context.Background(), 100 *time.Second)
+	ctx, canclel :=context.WithTimeout(context.Background(), 100 *time.Second)
 
-	defer cancle()
+	defer canclel()
 
 	err = client.Connect(ctx)
 	if err!= nil{
